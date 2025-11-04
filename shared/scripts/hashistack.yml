@@ -1,0 +1,174 @@
+---
+# - name: Create the shared directory
+#   ansible.builtin.file:
+#     path: /ops/shared
+#     state: directory
+#     mode: '0777'
+# - name: Copy shared directory contents
+#   ansible.builtin.copy:
+#     src: ../
+#     dest: /ops/shared
+#     mode: '0777'
+- name: Install HashiCorp Enterprise Stack and dependencies
+  hosts: all
+  become: yes
+  #remote_tmp: '/tmp'
+  vars:
+    consul_version: "1.19.2+ent"
+    nomad_version: "1.9.0+ent"
+    consul_template_version: "0.39.1"
+    config_dir: /ops/shared/config
+    consul_template_config_dir: /etc/consul-template.d
+    consul_template_dir: /opt/consul-template
+  vars_prompt:
+    - name: cloud_env
+      prompt: "Enter cloud environment (aws/gce/azure)"
+      private: no
+      default: "aws"
+  pre_tasks:
+    - name: Fail if CLOUD_ENV is not valid
+      assert:
+        that:
+          - cloud_env in ["aws", "gce", "azure"]
+        fail_msg: "CLOUD_ENV must be one of: aws, gce, azure"
+    - name: Set DEBIAN_FRONTEND to noninteractive
+      lineinfile:
+        path: /etc/environment
+        line: "DEBIAN_FRONTEND=noninteractive"
+        create: yes
+  tasks:
+    - name: Create the shared directory
+      ansible.builtin.file:
+        path: /ops/shared
+        state: directory
+        mode: "0777"
+    - name: Copy shared directory contents
+      ansible.builtin.copy:
+        src: ../
+        dest: /ops/shared
+        mode: "0777"
+    - name: Install software-properties-common (AWS/Azure)
+      apt:
+        name: software-properties-common
+        state: present
+        update_cache: no
+      when: cloud_env in ["aws", "azure"]
+
+    - name: Update apt cache and install software-properties-common (GCE)
+      apt:
+        name: software-properties-common
+        state: present
+        update_cache: yes
+      when: cloud_env == "gce"
+
+    - name: Refresh GPG keys
+      command: gpg --refresh-keys
+      changed_when: false
+
+    - name: Enable universe repository and update apt cache
+      apt_repository:
+        repo: "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }} universe"
+        state: present
+        update_cache: yes
+
+    - name: Install common utilities
+      apt:
+        name:
+          - unzip
+          - tree
+          - jq
+          - curl
+          - tmux
+          - wget
+          - gpg
+          - coreutils
+        state: present
+
+    - name: Clean apt cache
+      command: apt-get clean
+      changed_when: false
+
+    - name: Disable UFW firewall (if installed)
+      service:
+        name: ufw
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Create Consul Template directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ consul_template_config_dir }}"
+        - "{{ consul_template_dir }}"
+
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - gnupg2
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker CE
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Add OpenJDK PPA
+      apt_repository:
+        repo: ppa:openjdk-r/ppa
+        state: present
+
+    - name: Install OpenJDK 8
+      apt:
+        name: openjdk-8-jdk
+        state: present
+        update_cache: yes
+
+    - name: Set JAVA_HOME environment variable
+      lineinfile:
+        path: /etc/environment
+        line: 'JAVA_HOME={{ (lookup("pipe", "readlink -f /usr/bin/java") | regex_replace("bin/java", "")) | quote }}'
+        create: yes
+
+    - name: Download and install HashiCorp GPG key
+      get_url:
+        url: https://apt.releases.hashicorp.com/gpg
+        dest: /tmp/hashicorp.gpg
+        mode: "0644"
+      register: hashicorp_gpg
+
+    - name: Add HashiCorp GPG key to trusted keyring
+      command: gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg /tmp/hashicorp.gpg
+      args:
+        creates: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+    - name: Add HashiCorp APT repository
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+        filename: hashicorp
+
+    - name: Install HashiCorp Enterprise packages
+      apt:
+        name:
+          - "consul-enterprise={{ consul_version }}*"
+          - "nomad-enterprise={{ nomad_version }}*"
+          - "consul-template={{ consul_template_version }}*"
+        state: present
+        update_cache: yes
