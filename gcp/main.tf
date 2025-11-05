@@ -69,7 +69,7 @@ resource "google_compute_firewall" "clients_ingress" {
   # nginx example; replace with your application port
   allow {
     protocol = "tcp"
-    ports    = ["80", "443", "8200"]
+    ports    = ["80", "443", "8200", "5555", "8088"]
   }
 }
 

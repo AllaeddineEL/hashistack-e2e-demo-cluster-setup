@@ -9,5 +9,5 @@ variable "region" {
   description = "The GCP region"
 }
 variable "boundary_version" {
-  default = "0.19.3"
+  default = "0.20.0"
 }

@@ -86,8 +86,8 @@ resource "boundary_target" "dev-db-target" {
   description              = "Connect to the postgres database with Vault DB secrets engine credentials"
   scope_id                 = boundary_scope.dev_project.id
   session_connection_limit = -1
-  default_port             = 5432
-  address                  = "product-api-db.service.dc1.global"
+  default_port             = 5555
+  address                  = "api-gateway.service.dc1.global"
   egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
 
   brokered_credential_source_ids = [
@@ -121,8 +121,8 @@ resource "boundary_target" "hashicups" {
   description              = "Connect to the HashiCups Demo App"
   scope_id                 = boundary_scope.dev_project.id
   session_connection_limit = -1
-  default_port             = 80
-  address                  = "nginx.service.dc1.global"
+  default_port             = 8088
+  address                  = "api-gateway.service.dc1.global"
   egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
 }
 

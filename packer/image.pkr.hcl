@@ -30,20 +30,7 @@ source "googlecompute" "hashistack" {
   ssh_username  = "ubuntu"
   zone         = var.zone
 }
-
-build {
-  sources = ["sources.googlecompute.hashistack"]
-
-   provisioner "ansible" {
-      playbook_file = "../shared/scripts/hashistack.yml"
-      user          = "ubuntu"
-      extra_arguments = [
-        "--extra-vars", "cloud_env=gce","--become"
-      ]
-
-   }
-
-   hcp_packer_registry {
+ hcp_packer_registry {
     bucket_name = "hashistack-demo"
     description = "HashiStack E2E Demo"
     bucket_labels = {
@@ -56,4 +43,36 @@ build {
       "build-source" = basename(path.cwd)
     }
   }
+build {
+  sources = ["sources.googlecompute.hashistack"]
+
+
+   provisioner "ansible" {
+      playbook_file = "../shared/scripts/hashistack.yml"
+      user          = "ubuntu"
+      extra_arguments = [
+        "--extra-vars", "cloud_env=gce","--become"
+      ]
+
+   }
+     # Install trivy
+  provisioner "shell" {
+    inline = [
+      "sudo bash -c \"$(curl -sSL https://install.mondoo.com/sh)\""
+    ]
+  }
+
+  # Run trivy to generate the SBOM
+  provisioner "shell" {
+    inline = [
+      "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
+    ]
+  }
+    # Upload SBOM
+  provisioner "hcp-sbom" {
+    source      = "/tmp/sbom_cyclonedx.json"
+    destination = "./sbom"
+    sbom_name   = "sbom-cyclonedx-ubuntu"
+  }
+
 }
