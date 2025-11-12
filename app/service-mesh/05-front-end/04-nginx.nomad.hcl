@@ -83,7 +83,7 @@ job "nginx-reverse-proxy" {
         service = "nginx-reverse-proxy"
       }
       config {
-        image = "bitnami/nginx:1.26-debian-12"
+        image = "bitnami/nginx:latest"
         ports = ["${var.nginx_port}"]
         #network_mode = "host"
         mount {
