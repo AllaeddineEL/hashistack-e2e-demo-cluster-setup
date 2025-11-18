@@ -55,14 +55,14 @@ build {
       ]
 
    }
-     # Install trivy
+     # Install mondoo
   provisioner "shell" {
     inline = [
       "sudo bash -c \"$(curl -sSL https://install.mondoo.com/sh)\""
     ]
   }
 
-  # Run trivy to generate the SBOM
+  # Run mondoo to generate the SBOM
   provisioner "shell" {
     inline = [
       "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
