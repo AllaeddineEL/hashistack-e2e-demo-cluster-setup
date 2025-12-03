@@ -41,9 +41,13 @@ variable "server_count" {
   default     = "3"
 }
 
-variable "client_count" {
-  description = "The number of clients to provision."
-  default     = "3"
+variable "linux_client_count" {
+  description = "The number of Linux clients to provision."
+  default     = "2"
+}
+variable "win_client_count" {
+  description = "The number of Windows clients to provision."
+  default     = "1"
 }
 
 variable "root_block_device_size" {

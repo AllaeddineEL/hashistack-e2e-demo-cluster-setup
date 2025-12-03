@@ -79,6 +79,12 @@ data "google_compute_image" "hashistack_image" {
   filter      = "name eq ^hashistack.*"
 
 }
+data "google_compute_image" "win_hashistack_image" {
+
+  most_recent = true
+  filter      = "name eq ^win-hashistack.*"
+
+}
 # resource "random_uuid" "consul_token" {
 #   count = 2
 # }
@@ -145,9 +151,9 @@ resource "google_compute_instance" "server" {
 
 }
 
-resource "google_compute_instance" "client" {
-  count        = var.client_count
-  name         = "${var.name}-client-${count.index}"
+resource "google_compute_instance" "linux_client" {
+  count        = var.linux_client_count
+  name         = "${var.name}-linux-client-${count.index}"
   machine_type = var.client_instance_type
   zone         = var.zone
   tags         = ["auto-join", "nomad-clients"]
@@ -199,6 +205,61 @@ resource "google_compute_instance" "client" {
     agent_key             = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")
   })
 }
+resource "google_compute_instance" "windows_client" {
+  count        = var.win_client_count
+  name         = "${var.name}-windows-client-${count.index}"
+  machine_type = var.client_instance_type
+  zone         = var.zone
+  tags         = ["auto-join", "nomad-clients"]
+
+  allow_stopping_for_update = true
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.win_hashistack_image.self_link
+      size  = var.root_block_device_size
+    }
+  }
+
+  network_interface {
+    network = google_compute_network.hashistack.name
+    # access_config {
+    #   // Leave empty to get an ephemeral public IP
+    # }
+  }
+
+  service_account {
+    # https://developers.google.com/identity/protocols/googlescopes
+    scopes = [
+      "logging-write",
+      "cloud-platform",
+      "compute-rw",
+      "userinfo-email",
+      "storage-ro"
+    ]
+  }
+  metadata = {
+    sysprep-specialize-script-ps1 = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+      region     = var.region
+      cloud_env  = "gce"
+      retry_join = var.retry_join
+
+      domain           = var.domain,
+      datacenter       = var.datacenter,
+      consul_node_name = "consul-client-${count.index}",
+
+      consul_encryption_key = random_id.consul_gossip_key.b64_std,
+      consul_agent_token    = "${data.consul_acl_token_secret_id.consul-client-agent-token[count.index].secret_id}",
+      consul_default_token  = "${data.consul_acl_token_secret_id.consul-client-default-token[count.index].secret_id}",
+      nomad_node_name       = "nomad-client-${count.index}",
+      nomad_agent_meta      = "isPublic = false"
+      nomad_agent_token     = "${data.consul_acl_token_secret_id.nomad-client-consul-token[count.index].secret_id}",
+      ca_certificate        = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
+      agent_certificate     = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}"),
+      agent_key             = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")
+    })
+  }
+}
 resource "google_compute_forwarding_rule" "servers_default" {
   project               = var.project
   name                  = var.name
@@ -246,6 +307,6 @@ resource "google_compute_forwarding_rule" "clients_default" {
 resource "google_compute_target_pool" "client" {
   name = "client-pool"
 
-  instances = google_compute_instance.client.*.self_link
+  instances = google_compute_instance.linux_client.*.self_link
 
 }
