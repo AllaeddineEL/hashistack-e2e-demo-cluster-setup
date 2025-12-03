@@ -30,19 +30,19 @@ source "googlecompute" "hashistack" {
   ssh_username  = "ubuntu"
   zone         = var.zone
 }
- hcp_packer_registry {
-    bucket_name = "hashistack-demo"
-    description = "HashiStack E2E Demo"
-    bucket_labels = {
-      "team" = "platform-engineering",
-      "os"   = "ubuntu",
-      "cloud" = "GCP"
-    }
-    build_labels = {
-      "build-time"   = timestamp(),
-      "build-source" = basename(path.cwd)
-    }
+hcp_packer_registry {
+  bucket_name = "hashistack-demo"
+  description = "HashiStack E2E Demo"
+  bucket_labels = {
+    "team" = "platform-engineering",
+    "os"   = "ubuntu",
+    "cloud" = "GCP"
   }
+  build_labels = {
+    "build-time"   = timestamp(),
+    "build-source" = basename(path.cwd)
+  }
+}
 build {
   sources = ["sources.googlecompute.hashistack"]
 
