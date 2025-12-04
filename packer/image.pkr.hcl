@@ -43,17 +43,19 @@ source "googlecompute" "hashistack" {
 source "googlecompute" "win-hashistack" {
   image_name   = "win-hashistack-${local.timestamp}"
   project_id   = var.project
-  source_image = "windows-server-2019-dc-v20200813"
+  source_image = "windows-server-2025-dc-v20251112"
   zone         = var.zone
   disk_size    = 50
-  machine_type = "n1-standard-2"
+  machine_type = "n1-standard-4"
   communicator = "ssh"
   ssh_username = var.packer_username
   ssh_password = var.packer_user_password
   ssh_timeout  = "1h"
   metadata     = {
-    sysprep-specialize-script-cmd = "net user ${var.packer_username} ${var.packer_user_password} /ADD /passwordchg:no /expires:never /active:yes /fullname:\"Packer User\" /y & net localgroup Administrators ${var.packer_username} /ADD & net user ${var.packer_username} & powershell Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 & powershell Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0 & powershell Start-Service sshd & powershell Set-Service -Name sshd -StartupType 'Automatic' & powershell -NoProfile -ExecutionPolicy Bypass -Command \"Set-ExecutionPolicy -ExecutionPolicy bypass -Force\""
+    sysprep-specialize-script-cmd = "net user ${var.packer_username} ${var.packer_user_password} /ADD /passwordchg:no /expires:never /active:yes /fullname:\"${var.packer_username} User\" /y & net localgroup Administrators ${var.packer_username} /ADD & powershell Set-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -Profile Any & powershell Start-Service sshd & powershell Set-Service -Name sshd -StartupType 'Automatic' & powershell -NoProfile -ExecutionPolicy Bypass -Command \"Set-ExecutionPolicy -ExecutionPolicy bypass -Force\""
+  }
 }
+
 hcp_packer_registry {
   bucket_name = "hashistack-demo"
   description = "HashiStack E2E Demo"
@@ -67,6 +69,7 @@ hcp_packer_registry {
     "build-source" = basename(path.cwd)
   }
 }
+
 build {
   sources = ["sources.googlecompute.hashistack"]
 
