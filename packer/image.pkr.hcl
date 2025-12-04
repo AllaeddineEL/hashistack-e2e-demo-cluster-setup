@@ -113,11 +113,11 @@ build {
   }
   provisioner "file" {
     source = "../shared/conf/agent-config-consul_win_client.hcl"
-    destination = "C:\consul\consul.hcl"
+    destination = "C:\\consul\\consul.hcl"
   }
    provisioner "file" {
     source = "../shared/conf/agent-config-nomad_win_client.hcl"
-    destination = "C:\nomad\nomad.hcl"
+    destination = "C:\\nomad\\nomad.hcl"
   }
 
 }  
