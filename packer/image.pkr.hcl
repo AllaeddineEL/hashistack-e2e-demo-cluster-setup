@@ -52,8 +52,7 @@ source "googlecompute" "win-hashistack" {
   ssh_password = var.packer_user_password
   ssh_timeout  = "1h"
   metadata     = {
-    sysprep-specialize-script-cmd = "net user ${var.packer_username} \"${var.packer_user_password}\" /add /y & wmic UserAccount where Name=\"${var.packer_username}\" set PasswordExpires=False & net localgroup administrators ${var.packer_username} /add & powershell Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 & powershell Start-Service sshd & powershell Set-Service -Name sshd -StartupType 'Automatic' & powershell New-NetFirewallRule -Name 'OpenSSH-Server-In-TCP' -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22 & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Set-ExecutionPolicy -ExecutionPolicy bypass -Force\""
-  }
+    sysprep-specialize-script-cmd = "net user ${var.packer_username} ${var.packer_user_password} /ADD /passwordchg:no /expires:never /active:yes /fullname:\"Packer User\" /y & net localgroup Administrators ${var.packer_username} /ADD & net user ${var.packer_username} & powershell Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0 & powershell Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0 & powershell Start-Service sshd & powershell Set-Service -Name sshd -StartupType 'Automatic' & powershell -NoProfile -ExecutionPolicy Bypass -Command \"Set-ExecutionPolicy -ExecutionPolicy bypass -Force\""
 }
 hcp_packer_registry {
   bucket_name = "hashistack-demo"

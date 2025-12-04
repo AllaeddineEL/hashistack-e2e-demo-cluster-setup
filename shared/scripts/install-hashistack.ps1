@@ -19,6 +19,7 @@ netsh advfirewall set publicprofile state off
 choco install wget -y --force
 choco install unzip -y --force
 
+winget install -e --id GnuWin32.UnZip
 
 # # Install Docker
 # Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/microsoft/Windows-Containers/Main/helpful_tools/Install-DockerCE/install-docker-ce.ps1" -o install-docker-ce.ps1
@@ -39,10 +40,21 @@ mkdir %NOMAD_PLUGINS_PATH%
 cd %CONSUL_PATH%
 
 
-wget https://releases.hashicorp.com/consul/%CONSUL_VERSION%/consul_%CONSUL_VERSION%_windows_amd64.zip --no-check-certificate -O consul.zip -o consul.zip.log
+#wget https://releases.hashicorp.com/consul/%CONSUL_VERSION%/consul_%CONSUL_VERSION%_windows_amd64.zip --no-check-certificate -O consul.zip -o consul.zip.log
+
+$Url = "https://releases.hashicorp.com/consul/$CONSUL_VERSION/consul_${CONSUL_VERSION}_windows_amd64.zip"
+
+Invoke-WebRequest -Uri $Url -OutFile "consul.zip" -UseBasicParsing
+
 unzip consul.zip -d .
 
 # Download Nomad    
 cd %NOMAD_PATH%
-wget https://releases.hashicorp.com/nomad/%NOMAD_VERSION%/nomad_%NOMAD_VERSION%_windows_amd64.zip --no-check-certificate -O nomad.zip -o nomad.zip.log
+
+#wget https://releases.hashicorp.com/nomad/%NOMAD_VERSION%/nomad_%NOMAD_VERSION%_windows_amd64.zip --no-check-certificate -O nomad.zip -o nomad.zip.log
+
+$Url = "https://releases.hashicorp.com/nomad/$NOMAD_VERSION/nomad_${NOMAD_VERSION}_windows_amd64.zip"
+
+Invoke-WebRequest -Uri $Url -OutFile "nomad.zip" -UseBasicParsing
+
 unzip nomad.zip -d .
