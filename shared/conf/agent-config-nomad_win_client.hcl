@@ -9,10 +9,13 @@ region = "_NOMAD_DOMAIN"
 name = "_NOMAD_NODE_NAME"
 
 # Data Persistence
-data_dir = "C:\\nomad"
+data_dir = "C:\\nomad\\data"
 
 # Logging
 log_level = "INFO"
+log_file = "C:\\nomad\\logs.txt"
+log_rotate_bytes = "100000"
+log_rotate_max_files = "5"
 # enable_syslog = false
 enable_debug = false
 

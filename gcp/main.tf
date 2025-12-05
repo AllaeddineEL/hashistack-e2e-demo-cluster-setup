@@ -239,7 +239,7 @@ resource "google_compute_instance" "windows_client" {
     ]
   }
   metadata = {
-    sysprep-specialize-script-ps1 = templatefile("${path.module}/../shared/data-scripts/user-data-client.sh", {
+    sysprep-specialize-script-ps1 = templatefile("${path.module}/../shared/data-scripts/user-data-client.ps1", {
       region     = var.region
       cloud_env  = "gce"
       retry_join = var.retry_join

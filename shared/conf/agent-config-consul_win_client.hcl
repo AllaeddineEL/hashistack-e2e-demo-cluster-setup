@@ -10,10 +10,13 @@ domain = "_CONSUL_DOMAIN"
 node_name = "_CONSUL_NODE_NAME"
 
 # Data Persistence
-data_dir = "C:\\consul"
+data_dir = "C:\\consul\\data"
 
 # Logging
 log_level = "INFO"
+log_file = "C:\\consul\\logs.txt"
+log_rotate_bytes = "100000"
+log_rotate_max_files = "5"
 # enable_syslog = false
 
 ## Disable script checks

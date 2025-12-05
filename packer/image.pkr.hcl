@@ -29,7 +29,7 @@ variable "packer_username" {
 }
 variable "packer_user_password" {
   type = string
-  default = "packer$HashiStack"
+  default = "Hash!5tack"
 }
 
 source "googlecompute" "hashistack" {
@@ -115,11 +115,11 @@ build {
   }
   provisioner "file" {
     source = "../shared/conf/agent-config-consul_win_client.hcl"
-    destination = "C:\\consul\\consul.hcl"
+    destination = "C:/consul/config/consul.hcl"
   }
    provisioner "file" {
     source = "../shared/conf/agent-config-nomad_win_client.hcl"
-    destination = "C:\\nomad\\nomad.hcl"
+    destination = "C:/nomad/config/nomad.hcl"
   }
 
 }  
