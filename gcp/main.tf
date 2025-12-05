@@ -217,7 +217,7 @@ resource "google_compute_instance" "windows_client" {
   boot_disk {
     initialize_params {
       image = data.google_compute_image.win_hashistack_image.self_link
-      size  = var.root_block_device_size
+      size  = 50
     }
   }
 
@@ -307,6 +307,6 @@ resource "google_compute_forwarding_rule" "clients_default" {
 resource "google_compute_target_pool" "client" {
   name = "client-pool"
 
-  instances = [google_compute_instance.linux_client.*.self_link, google_compute_instance.windows_client.*.self_link]
+  instances = concat(google_compute_instance.linux_client.*.self_link, google_compute_instance.windows_client.*.self_link)
 
 }
