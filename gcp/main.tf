@@ -246,17 +246,17 @@ resource "google_compute_instance" "windows_client" {
 
       domain           = var.domain,
       datacenter       = var.datacenter,
-      consul_node_name = "consul-client-${count.index}",
+      consul_node_name = "consul-win-client-${count.index}",
 
       consul_encryption_key = random_id.consul_gossip_key.b64_std,
-      consul_agent_token    = "${data.consul_acl_token_secret_id.consul-client-agent-token[count.index].secret_id}",
-      consul_default_token  = "${data.consul_acl_token_secret_id.consul-client-default-token[count.index].secret_id}",
-      nomad_node_name       = "nomad-client-${count.index}",
+      consul_agent_token    = "${data.consul_acl_token_secret_id.consul-client-agent-token[var.linux_client_count + count.index].secret_id}",
+      consul_default_token  = "${data.consul_acl_token_secret_id.consul-client-default-token[var.linux_client_count + count.index].secret_id}",
+      nomad_node_name       = "nomad-win-client-${count.index}",
       nomad_agent_meta      = "isPublic = false"
-      nomad_agent_token     = "${data.consul_acl_token_secret_id.nomad-client-consul-token[count.index].secret_id}",
-      ca_certificate        = base64gzip("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
-      agent_certificate     = base64gzip("${tls_locally_signed_cert.client_cert[count.index].cert_pem}"),
-      agent_key             = base64gzip("${tls_private_key.client_key[count.index].private_key_pem}")
+      nomad_agent_token     = "${data.consul_acl_token_secret_id.nomad-client-consul-token[var.linux_client_count + count.index].secret_id}",
+      ca_certificate        = "${tls_self_signed_cert.datacenter_ca.cert_pem}",
+      agent_certificate     = "${tls_locally_signed_cert.client_cert[var.linux_client_count + count.index].cert_pem}",
+      agent_key             = "${tls_private_key.client_key[var.linux_client_count + count.index].private_key_pem}"
     })
   }
 }
@@ -307,6 +307,6 @@ resource "google_compute_forwarding_rule" "clients_default" {
 resource "google_compute_target_pool" "client" {
   name = "client-pool"
 
-  instances = google_compute_instance.linux_client.*.self_link
+  instances = [google_compute_instance.linux_client.*.self_link, google_compute_instance.windows_client.*.self_link]
 
 }

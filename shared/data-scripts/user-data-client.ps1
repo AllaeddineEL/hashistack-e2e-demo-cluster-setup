@@ -1,6 +1,8 @@
 # Exit on error
 $ErrorActionPreference = "Stop"
 
+Start-Transcript -Append C:\Windows\Temp\UserData.txt
+
 # -------------------------------------------------------------------------------
 # Paths (Windows versions)
 # -------------------------------------------------------------------------------

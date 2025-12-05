@@ -111,14 +111,14 @@ resource "tls_locally_signed_cert" "server_cert" {
 
 # Client Keys
 resource "tls_private_key" "client_key" {
-  count       = var.client_count
+  count       = var.linux_client_count + var.win_client_count
   algorithm   = "ECDSA"
   ecdsa_curve = "P384"
 }
 
 # Client CSR
 resource "tls_cert_request" "client_csr" {
-  count           = var.client_count
+  count           = var.linux_client_count + var.win_client_count
   private_key_pem = element(tls_private_key.client_key.*.private_key_pem, count.index)
 
   subject {
@@ -135,6 +135,8 @@ resource "tls_cert_request" "client_csr" {
     "client-${count.index}.${var.datacenter}.${var.domain}",
     "consul-client-${count.index}.${var.datacenter}.${var.domain}",
     "nomad-client-${count.index}.${var.datacenter}.${var.domain}",
+    "consul-win-client-${count.index}.${var.datacenter}.${var.domain}",
+    "nomad-win-client-${count.index}.${var.datacenter}.${var.domain}",
     "client.global.nomad",
     "localhost"
   ]
@@ -146,7 +148,7 @@ resource "tls_cert_request" "client_csr" {
 
 # Client Certs
 resource "tls_locally_signed_cert" "client_cert" {
-  count            = var.client_count
+  count            = var.linux_client_count + var.win_client_count
   cert_request_pem = element(tls_cert_request.client_csr.*.cert_request_pem, count.index)
 
   ca_private_key_pem = tls_private_key.datacenter_ca.private_key_pem
@@ -213,7 +215,7 @@ resource "nomad_acl_token" "nomad-user-token" {
 # Consul client agent token
 resource "consul_acl_token" "consul-client-agent-token" {
   depends_on  = [time_sleep.wait_60_seconds, data.consul_acl_token_secret_id.nomad-client-consul-token]
-  count       = var.client_count
+  count       = var.linux_client_count
   description = "Consul client ${count.index} agent token"
   templated_policies {
     template_name = "builtin/node"
@@ -225,14 +227,14 @@ resource "consul_acl_token" "consul-client-agent-token" {
 
 data "consul_acl_token_secret_id" "consul-client-agent-token" {
   depends_on  = [time_sleep.wait_60_seconds]
-  count       = var.client_count
+  count       = var.linux_client_count
   accessor_id = consul_acl_token.consul-client-agent-token[count.index].id
 }
 
 # Consul client default token
 resource "consul_acl_token" "consul-client-default-token" {
   depends_on  = [time_sleep.wait_60_seconds]
-  count       = var.client_count
+  count       = var.linux_client_count
   description = "Consul client ${count.index} default token"
   templated_policies {
     template_name = "builtin/dns"
@@ -241,14 +243,14 @@ resource "consul_acl_token" "consul-client-default-token" {
 
 data "consul_acl_token_secret_id" "consul-client-default-token" {
   depends_on  = [time_sleep.wait_60_seconds]
-  count       = var.client_count
+  count       = var.linux_client_count
   accessor_id = consul_acl_token.consul-client-default-token[count.index].id
 }
 
 # Nomad client Consul token
 resource "consul_acl_token" "nomad-client-consul-token" {
   depends_on  = [time_sleep.wait_60_seconds]
-  count       = var.client_count
+  count       = var.linux_client_count
   description = "Nomad client ${count.index} Consul token"
   templated_policies {
     template_name = "builtin/nomad-client"
@@ -257,7 +259,7 @@ resource "consul_acl_token" "nomad-client-consul-token" {
 
 data "consul_acl_token_secret_id" "nomad-client-consul-token" {
   depends_on  = [time_sleep.wait_60_seconds]
-  count       = var.client_count
+  count       = var.linux_client_count
   accessor_id = consul_acl_token.nomad-client-consul-token[count.index].id
 }
 
