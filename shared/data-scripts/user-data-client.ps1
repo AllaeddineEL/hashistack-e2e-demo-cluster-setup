@@ -148,5 +148,8 @@ Replace-Token "$NOMAD_CONFIG_PATH\nomad.hcl" "_NOMAD_NODE_NAME"   $NOMAD_NODE_NA
 Replace-Token "$NOMAD_CONFIG_PATH\nomad.hcl" "_NOMAD_AGENT_META"  $NOMAD_AGENT_META
 Replace-Token "$NOMAD_CONFIG_PATH\nomad.hcl" "_CONSUL_AGENT_TOKEN" $NOMAD_AGENT_TOKEN
 
+(Get-Content $CONSUL_CONFIG_PATH\consul.hcl) | Out-File $CONSUL_CONFIG_PATH\consul.hcl -Encoding ascii 
+(Get-Content $NOMAD_CONFIG_PATH\nomad.hcl) | Out-File $NOMAD_CONFIG_PATH\nomad.hcl -Encoding ascii 
+
 Start-Service consul
 Start-Service nomad

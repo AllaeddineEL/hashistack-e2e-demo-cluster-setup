@@ -15,8 +15,8 @@ data_dir = "C:\\consul\\data"
 # Logging
 log_level = "INFO"
 log_file = "C:\\consul\\logs.txt"
-log_rotate_bytes = "100000"
-log_rotate_max_files = "5"
+log_rotate_bytes = 100000
+log_rotate_max_files = 5
 # enable_syslog = false
 
 ## Disable script checks
@@ -40,7 +40,7 @@ server = false
 
 
 # Addresses and ports
-client_addr = "127.0.0.1 _EXTRA_CONSUL_CLIENT_ADDR"
+client_addr = "127.0.0.1"
 bind_addr   = "_CONSUL_BIND_ADDR"
 
 # Ports

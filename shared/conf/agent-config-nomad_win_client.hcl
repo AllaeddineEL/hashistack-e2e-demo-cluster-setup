@@ -14,8 +14,8 @@ data_dir = "C:\\nomad\\data"
 # Logging
 log_level = "INFO"
 log_file = "C:\\nomad\\logs.txt"
-log_rotate_bytes = "100000"
-log_rotate_max_files = "5"
+log_rotate_bytes = 100000
+log_rotate_max_files = 5
 # enable_syslog = false
 enable_debug = false
 
@@ -26,7 +26,7 @@ enable_debug = false
 client {
   enabled = true
   options {
-    "driver.raw_exec.enable"    = "1"
+    "driver.raw_exec.enable" = 1
   }
   meta {
     _NOMAD_AGENT_META
