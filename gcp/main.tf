@@ -239,7 +239,7 @@ resource "google_compute_instance" "windows_client" {
     ]
   }
   metadata = {
-    sysprep-specialize-script-ps1 = templatefile("${path.module}/../shared/data-scripts/user-data-client.ps1", {
+    windows-startup-script-ps1 = templatefile("${path.module}/../shared/data-scripts/user-data-client.ps1", {
       region     = var.region
       cloud_env  = "gce"
       retry_join = var.retry_join
@@ -254,9 +254,9 @@ resource "google_compute_instance" "windows_client" {
       nomad_node_name       = "nomad-win-client-${count.index}",
       nomad_agent_meta      = "isPublic = false"
       nomad_agent_token     = "${data.consul_acl_token_secret_id.nomad-client-consul-token[var.linux_client_count + count.index].secret_id}",
-      ca_certificate        = "${tls_self_signed_cert.datacenter_ca.cert_pem}",
-      agent_certificate     = "${tls_locally_signed_cert.client_cert[var.linux_client_count + count.index].cert_pem}",
-      agent_key             = "${tls_private_key.client_key[var.linux_client_count + count.index].private_key_pem}"
+      ca_certificate        = base64encode("${tls_self_signed_cert.datacenter_ca.cert_pem}"),
+      agent_certificate     = base64encode("${tls_locally_signed_cert.client_cert[var.linux_client_count + count.index].cert_pem}"),
+      agent_key             = base64encode("${tls_private_key.client_key[var.linux_client_count + count.index].private_key_pem}")
     })
   }
 }

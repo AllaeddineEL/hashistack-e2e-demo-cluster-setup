@@ -1,7 +1,12 @@
 # Exit on error
+
+
 $ErrorActionPreference = "Stop"
 
+Write-Host "Start Logging"
+
 Start-Transcript -Append C:\Windows\Temp\UserData.txt
+
 
 # -------------------------------------------------------------------------------
 # Paths (Windows versions)
@@ -20,16 +25,27 @@ $NOMAD_CERTS_PATH = "C:\nomad\certs"
 $NOMAD_PLUGINS_PATH = "C:\nomad\plugins"
 
 
-$ca_certificate > "$CONSUL_CERTS_PATH\consul-agent-ca.pem"
-$ca_certificate > "$NOMAD_CERTS_PATH\nomad-agent-ca.pem"
-$agent_certificate > "$NOMAD_CERTS_PATH\nomad-agent.pem"
-$agent_key > "$NOMAD_CERTS_PATH\nomad-agent-key.pem"
+
+Write-Host "Decoding certificates..."
+
+[IO.File]::WriteAllBytes("C:\Windows\Temp\agent-ca.pem",    [Convert]::FromBase64String("${ca_certificate}"))
+
+[IO.File]::WriteAllBytes("C:\Windows\Temp\agent.pem",       [Convert]::FromBase64String("${agent_certificate}"))
+
+[IO.File]::WriteAllBytes("C:\Windows\Temp\agent-key.pem",   [Convert]::FromBase64String("${agent_key}"))
+
+
+
+Copy-Item "C:\Windows\Temp\agent-ca.pem"  "$CONSUL_CERTS_PATH\consul-agent-ca.pem"
+Copy-Item "C:\Windows\Temp\agent-ca.pem"  "$NOMAD_CERTS_PATH\nomad-agent-ca.pem"
+Copy-Item "C:\Windows\Temp\agent.pem"     "$NOMAD_CERTS_PATH\nomad-agent.pem"
+Copy-Item "C:\Windows\Temp\agent-key.pem" "$NOMAD_CERTS_PATH\nomad-agent-key.pem"
 
 # -------------------------------------------------------------------------------
 # IP address detection by cloud metadata
 # -------------------------------------------------------------------------------
 
-$cloud = $cloud_env
+$cloud = "${cloud_env}"
 $IP_ADDRESS = ""
 
 switch ($cloud) {
@@ -50,10 +66,10 @@ switch ($cloud) {
     "gce" {
         Write-Host "CLOUD_ENV: gce"
 
-        $IP_ADDRESS = Invoke-WebRequest `
+        $IP_ADDRESS =  Invoke-RestMethod  `
             -Uri "http://metadata/computeMetadata/v1/instance/network-interfaces/0/ip" `
             -Headers @{ "Metadata-Flavor" = "Google" } `
-            -UseBasicParsing | Select-Object -ExpandProperty Content
+            -UseBasicParsing 
     }
     "azure" {
         Write-Host "CLOUD_ENV: azure"
@@ -70,26 +86,27 @@ switch ($cloud) {
     }
 }
 
+Write-Host "The local IP: $IP_ADDRESS"
 # -------------------------------------------------------------------------------
 # Variables for rendering *.hcl config files
 # -------------------------------------------------------------------------------
 
-$CONSUL_DATACENTER   = $datacenter
-$CONSUL_DOMAIN       = $domain
-$CONSUL_NODE_NAME    = $consul_node_name
-$CONSUL_BIND_ADDR    = $IP_ADDRESS
-$CONSUL_RETRY_JOIN   = $retry_join
-$CONSUL_ENCRYPTION_KEY = $consul_encryption_key
-$CONSUL_AGENT_TOKEN  = $consul_agent_token
-$CONSUL_DEFAULT_TOKEN = $consul_default_token
+$CONSUL_DATACENTER   = "${datacenter}"
+$CONSUL_DOMAIN       = "${domain}"
+$CONSUL_NODE_NAME    = "${consul_node_name}"
+$CONSUL_BIND_ADDR    = "$IP_ADDRESS"
+$CONSUL_RETRY_JOIN   = "${retry_join}"
+$CONSUL_ENCRYPTION_KEY = "${consul_encryption_key}"
+$CONSUL_AGENT_TOKEN  = "${consul_agent_token}"
+$CONSUL_DEFAULT_TOKEN = "${consul_default_token}"
 
-$NOMAD_DATACENTER    = $datacenter
-$NOMAD_DOMAIN        = $domain
-$NOMAD_NODE_NAME     = $nomad_node_name
-$NOMAD_AGENT_META    = $nomad_agent_meta
-$NOMAD_AGENT_TOKEN   = $nomad_agent_token
+$NOMAD_DATACENTER    = "${datacenter}"
+$NOMAD_DOMAIN        = "${domain}"
+$NOMAD_NODE_NAME     = "${nomad_node_name}"
+$NOMAD_AGENT_META    = "${nomad_agent_meta}"
+$NOMAD_AGENT_TOKEN   = "${nomad_agent_token}"
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------}-------------------
 # Expand templates like sed -i
 # PowerShell replaces tokens in files
 # -------------------------------------------------------------------------------
