@@ -107,7 +107,7 @@ tls {
   rpc       = true
 
   ca_file   = "C:\\nomad\\certs\\nomad-agent-ca.pem"
-  cert_file = "C:\\nomad\certs\\nomad-agent.pem"
+  cert_file = "C:\\nomad\\certs\\nomad-agent.pem"
   key_file  = "C:\\nomad\\certs\\nomad-agent-key.pem"
 
   verify_server_hostname = true

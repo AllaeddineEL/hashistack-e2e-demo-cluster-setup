@@ -57,7 +57,7 @@ New-Service `
 
 New-Service `
 -Name "nomad" `
--BinaryPathName "$NOMAD_PATH\nomad.exe agent -config-dir=$NOMAD_CONFIG_PATH" `
+-BinaryPathName "$NOMAD_PATH\nomad.exe agent -config=$NOMAD_CONFIG_PATH" `
 -DisplayName "HashiCorp Nomad Agent" `
 -StartupType Automatic
 

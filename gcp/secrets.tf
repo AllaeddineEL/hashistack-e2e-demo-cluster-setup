@@ -220,7 +220,7 @@ resource "consul_acl_token" "consul-client-agent-token" {
   templated_policies {
     template_name = "builtin/node"
     template_variables {
-      name = "consul-client-${count.index}"
+      name = count.index < var.linux_client_count ? "consul-client-${count.index}" : "consul-win-client-${count.index - var.linux_client_count}"
     }
   }
 }
