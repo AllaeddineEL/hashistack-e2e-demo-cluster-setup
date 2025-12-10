@@ -18,3 +18,7 @@ variable "name" {
   default     = "nomad"
 }
 
+variable "vault_version" {
+  description = "The version of Vault to deploy."
+  default     = "1.21.1"
+}

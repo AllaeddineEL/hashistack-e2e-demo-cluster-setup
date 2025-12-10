@@ -25,16 +25,16 @@ job "vault-cluster" {
 
     network {
 
-      mode = "host"
+      mode = "bridge"
 
       port "api" {
         to     = "8200"
-        static = "8200"
+       # static = "8200"
       }
 
       port "cluster" {
         to     = "8201"
-        static = "8201"
+        #static = "8201"
       }
     }
 
@@ -59,9 +59,9 @@ job "vault-cluster" {
       }
 
       config {
-        image      = "hashicorp/vault-enterprise:1.17.4-ent"
+        image      = "hashicorp/vault-enterprise:${var.vault_version}-ent"
         privileged = true
-        network_mode = "host"
+        network_mode = "bridge"
         ports = [
           "api",
           "cluster"
@@ -100,8 +100,8 @@ storage "raft" {
   {{- end }}
 }
 
-cluster_addr = "http://{{ env "NOMAD_IP_cluster" }}:8201"
-api_addr     = "http://{{ env "NOMAD_IP_api" }}:8200"
+cluster_addr = "http://{{ env "NOMAD_ADDR_cluster" }}"
+api_addr     = "http://{{ env "NOMAD_ADDR_api" }}"
 
 seal "gcpckms" {
   project     = "${data.terraform_remote_state.local.outputs.gcp_project}"
