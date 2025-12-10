@@ -16,6 +16,7 @@ log_level = "INFO"
 # enable_syslog = false
 enable_debug = false
 
+
 # -----------------------------+
 # CLIENT CONFIG                |
 # -----------------------------+
@@ -31,6 +32,21 @@ client {
   }
 }
 
+plugin "docker" {
+  config {
+    allow_privileged = true
+    volumes {
+      enabled = true
+    }
+  }
+}
+plugin "nomad-driver-exec2" {
+  config {
+    unveil_defaults = true
+    unveil_paths    = []
+    unveil_by_task  = true
+  }
+}
 # -----------------------------+
 # NETWORKING CONFIG            |
 # -----------------------------+

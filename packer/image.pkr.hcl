@@ -74,7 +74,7 @@ build {
 
 
    provisioner "ansible" {
-      only   = ["sources.googlecompute.hashistack"]
+      only   = ["googlecompute.hashistack"]
       playbook_file = "../shared/scripts/hashistack.yml"
       user          = "ubuntu"
       extra_arguments = [
@@ -84,7 +84,7 @@ build {
    }
      # Install mondoo
   provisioner "shell" {
-    only   = ["sources.googlecompute.hashistack"]
+    only   = ["googlecompute.hashistack"]
     inline = [
       "sudo bash -c \"$(curl -sSL https://install.mondoo.com/sh)\""
     ]
@@ -92,32 +92,32 @@ build {
 
   # Run mondoo to generate the SBOM
   provisioner "shell" {
-    only   = ["sources.googlecompute.hashistack"]
+    only   = ["googlecompute.hashistack"]
     inline = [
       "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
     ]
   }
     # Upload SBOM
   provisioner "hcp-sbom" {
-    only   = ["sources.googlecompute.hashistack"]
+    only   = ["googlecompute.hashistack"]
     source      = "/tmp/sbom_cyclonedx.json"
     destination = "./sbom"
     sbom_name   = "sbom-cyclonedx-ubuntu"
   }
 
   provisioner "powershell" {
-    only   = ["sources.googlecompute.win-hashistack"]
+    only   = ["googlecompute.win-hashistack"]
     script = "../shared/scripts/install-hashistack.ps1"
     elevated_user     = var.packer_username
     elevated_password = var.packer_user_password
   }
   provisioner "file" {
-    only   = ["sources.googlecompute.win-hashistack"]
+    only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/agent-config-consul_win_client.hcl"
     destination = "C:/consul/config/consul.hcl"
   }
    provisioner "file" {
-    only   = ["sources.googlecompute.win-hashistack"]
+    only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/agent-config-nomad_win_client.hcl"
     destination = "C:/nomad/config/nomad.hcl"
   }
