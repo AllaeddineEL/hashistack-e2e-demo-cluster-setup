@@ -14,5 +14,9 @@ output "boundary_admin_auth_method" {
 }
 
 output "hcp_project_id" {
-  value = hcp_project.project.resource_id
+  value = data.terraform_remote_state.hcp.outputs.hcp_project_id
+}
+output "cluster_id" {
+  description = "The public URL of the HCP Boundary Cluster"
+  value       = hcp_boundary_cluster.boundary.cluster_id
 }

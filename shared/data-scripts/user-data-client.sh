@@ -91,7 +91,7 @@ NOMAD_AGENT_TOKEN="${nomad_agent_token}"
 #-------------------------------------------------------------------------------
 
 # Install the Nomad exec2 driver.
-export NOMAD_DRIVER_EXEC2_VER=0.1.0
+export NOMAD_DRIVER_EXEC2_VER=0.1.1
 
 sudo mkdir -p /opt/nomad/data/plugins
 sudo chmod 755 /opt/nomad/data/plugins

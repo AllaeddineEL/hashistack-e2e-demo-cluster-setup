@@ -5,6 +5,7 @@ job "nodes" {
   group "nodes" {
     task "plugin" {
       driver = "docker"
+      consul {}
       template {
         data = <<EOH
 {{ key "service_account" }}

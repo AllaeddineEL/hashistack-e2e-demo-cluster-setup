@@ -6,6 +6,14 @@ data "terraform_remote_state" "boundary_cluster" {
   }
 }
 
+data "terraform_remote_state" "hcp" {
+  backend = "local"
+
+  config = {
+    path = "../../hcp/terraform.tfstate"
+  }
+}
+
 terraform {
   required_version = ">= 1.0"
   required_providers {
@@ -29,4 +37,7 @@ provider "boundary" {
   auth_method_id         = data.terraform_remote_state.boundary_cluster.outputs.boundary_admin_auth_method
   auth_method_login_name = "admin"
   auth_method_password   = data.terraform_remote_state.boundary_cluster.outputs.boundary_admin_password
+}
+provider "hcp" {
+  project_id = data.terraform_remote_state.hcp.outputs.hcp_project_id
 }

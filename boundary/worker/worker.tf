@@ -1,5 +1,9 @@
 resource "random_uuid" "worker_uuid" {}
 
+data "hcp_boundary_cluster" "default" {
+  cluster_id = data.terraform_remote_state.boundary_cluster.outputs.cluster_id
+  project_id = data.terraform_remote_state.hcp.outputs.hcp_project_id
+}
 resource "boundary_worker" "hcp_pki_worker" {
   scope_id                    = "global"
   name                        = "boundary-worker-${random_uuid.worker_uuid.result}"
@@ -8,9 +12,10 @@ resource "boundary_worker" "hcp_pki_worker" {
 }
 
 locals {
+  cluster_id             = split(".", split("//", data.terraform_remote_state.boundary_cluster.outputs.boundary_url)[1])[0]
   boundary_worker_config = <<-WORKER_CONFIG
     disable_mlock = true
-    hcp_boundary_cluster_id = "${split(".", split("//", data.terraform_remote_state.boundary_cluster.outputs.boundary_url)[1])[0]}"
+    hcp_boundary_cluster_id = "${local.cluster_id}"
     listener "tcp" {
       purpose = "proxy"
       address = "0.0.0.0"
@@ -69,7 +74,7 @@ job "boundary-worker" {
       }
 
       artifact {
-        source      = "https://releases.hashicorp.com/boundary/${var.boundary_version}+ent/boundary_${var.boundary_version}+ent_linux_amd64.zip"
+        source      = "https://releases.hashicorp.com/boundary/${data.hcp_boundary_cluster.default.version}+ent/boundary_${data.hcp_boundary_cluster.default.version}+ent_linux_amd64.zip"
         destination = "tmp/"
       }
 

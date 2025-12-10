@@ -4,6 +4,7 @@ job "controller" {
   group "controller" {
     task "plugin" {
       driver = "docker"
+      consul {}
       template {
         data = <<EOH
 {{ key "service_account" }}
