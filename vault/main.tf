@@ -81,6 +81,7 @@ job "vault-cluster" {
       template {
         data = <<EOH
 ui = true
+disable_mlock = true
 cluster_name = "nomad-vault-demo"
 listener "tcp" {
   address         = "[::]:8200"
@@ -89,7 +90,7 @@ listener "tcp" {
 }
 
 storage "raft" {
-  node_id = "{{ env "NOMAD_ALLOC_NAME" }}"
+  node_id = "{{ env "NOMAD_SHORT_ALLOC_ID" }}"
   path    = "{{ env "NOMAD_ALLOC_DIR" }}/vault/data"
 
 {{- range service "vault" }}
