@@ -72,7 +72,7 @@ hcp_packer_registry {
 build {
   sources = ["sources.googlecompute.hashistack", "sources.googlecompute.win-hashistack"]
 
-
+   #Provision the linux HashiStack image with Ansible
    provisioner "ansible" {
       only   = ["googlecompute.hashistack"]
       playbook_file = "../shared/scripts/hashistack.yml"
@@ -97,7 +97,7 @@ build {
       "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
     ]
   }
-    # Upload SBOM
+  # Upload Linux SBOM
   provisioner "hcp-sbom" {
     only   = ["googlecompute.hashistack"]
     source      = "/tmp/sbom_cyclonedx.json"
@@ -111,6 +111,33 @@ build {
     elevated_user     = var.packer_username
     elevated_password = var.packer_user_password
   }
+  provisioner "powershell" {
+    only   = ["googlecompute.win-hashistack"]
+    inline = [
+      "Set-ExecutionPolicy Unrestricted -Scope Process -Force;", 
+      "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;",
+      "iex ((New-Object System.Net.WebClient).DownloadString('https://install.mondoo.com/ps1/cnquery'));",
+      "Install-Mondoo -Product cnquery;"
+    ]
+    elevated_user     = var.packer_username
+    elevated_password = var.packer_user_password
+  }
+
+  provisioner "powershell" {
+    only   = ["googlecompute.win-hashistack"]
+    inline = [
+    "& \"C:\\Program Files\\Mondoo\\cnquery.exe\" sbom --output cyclonedx-json --output-target C:\\Windows\\Temp\\win_sbom_cyclonedx.json"
+    ]
+    elevated_user     = var.packer_username
+    elevated_password = var.packer_user_password
+  }
+  provisioner "hcp-sbom" {
+    only   = ["googlecompute.win-hashistack"]
+    source      = "C:/Windows/Temp/win_sbom_cyclonedx.json"
+    destination = "./win-sbom"
+    sbom_name   = "sbom-cyclonedx-windows"
+  }
+
   provisioner "file" {
     only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/agent-config-consul_win_client.hcl"
@@ -123,23 +150,3 @@ build {
   }
 
 }
-
-// build {
-
-//   sources = ["sources.googlecompute.win-hashistack"]
-  
-//   provisioner "powershell" {
-//     script = "../shared/scripts/install-hashistack.ps1"
-//     elevated_user     = var.packer_username
-//     elevated_password = var.packer_user_password
-//   }
-//   provisioner "file" {
-//     source = "../shared/conf/agent-config-consul_win_client.hcl"
-//     destination = "C:/consul/config/consul.hcl"
-//   }
-//    provisioner "file" {
-//     source = "../shared/conf/agent-config-nomad_win_client.hcl"
-//     destination = "C:/nomad/config/nomad.hcl"
-//   }
-
-// }  
