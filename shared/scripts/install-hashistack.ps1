@@ -1,5 +1,5 @@
-$CONSUL_VERSION = "1.22.1+ent"
-$NOMAD_VERSION = "1.11.0+ent"
+$CONSUL_VERSION = "1.22.2+ent"
+$NOMAD_VERSION = "1.11.1+ent"
 
 $CONSUL_PATH = "C:\consul"
 $CONSUL_CONFIG_PATH = "C:\consul\config"

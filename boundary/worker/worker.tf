@@ -12,6 +12,7 @@ resource "boundary_worker" "hcp_pki_worker" {
 }
 
 locals {
+  boundary_version       = trimsuffix(data.hcp_boundary_cluster.default.version, "-HCP")
   cluster_id             = split(".", split("//", data.terraform_remote_state.boundary_cluster.outputs.boundary_url)[1])[0]
   boundary_worker_config = <<-WORKER_CONFIG
     disable_mlock = true
@@ -74,7 +75,7 @@ job "boundary-worker" {
       }
 
       artifact {
-        source      = "https://releases.hashicorp.com/boundary/${data.hcp_boundary_cluster.default.version}+ent/boundary_${data.hcp_boundary_cluster.default.version}+ent_linux_amd64.zip"
+        source      = "https://releases.hashicorp.com/boundary/${local.boundary_version}+ent/boundary_${local.boundary_version}+ent_linux_amd64.zip"
         destination = "tmp/"
       }
 
