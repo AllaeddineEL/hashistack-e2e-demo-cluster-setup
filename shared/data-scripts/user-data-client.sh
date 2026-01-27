@@ -170,8 +170,11 @@ echo "127.0.0.1 $(hostname)" | sudo tee --append /etc/hosts
 # ref: https://developer.hashicorp.com/consul/tutorials/networking/dns-forwarding#systemd-resolved-setup
 sudo mkdir -p /etc/systemd/resolved.conf.d/
 sudo cp $CONFIG_DIR/systemd-service-config-resolved.conf /etc/systemd/resolved.conf.d/consul.conf
+sudo cp $CONFIG_DIR/docker-daemon.json /etc/docker/daemon.json
 
 sudo sed -i "s/_CONSUL_DOMAIN/$CONSUL_DOMAIN/g" /etc/systemd/resolved.conf.d/consul.conf
 sudo sed -i "s/_DOCKER_BRIDGE_IP_ADDRESS/$DOCKER_BRIDGE_IP_ADDRESS/g" /etc/systemd/resolved.conf.d/consul.conf
+sudo sed -i "s/_DOCKER_BRIDGE_IP_ADDRESS/$DOCKER_BRIDGE_IP_ADDRESS/g" /etc/docker/daemon.json
 
 sudo systemctl restart systemd-resolved
+sudo systemctl restart docker
