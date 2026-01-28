@@ -12,7 +12,7 @@ job "vault-cluster" {
 
 
   group "vault" {
-    count = 3
+    count = 1
 
     volume "vault_data" {
       type            = "csi"

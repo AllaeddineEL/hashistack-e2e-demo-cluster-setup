@@ -30,3 +30,14 @@ resource "boundary_target" "vault" {
   address                  = "vault.service.dc1.global"
   egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
 }
+
+resource "boundary_target" "win" {
+  type                     = "tcp"
+  name                     = "win"
+  description              = "Connect to the Windows server"
+  scope_id                 = boundary_scope.shared_svc_project.id
+  session_connection_limit = -1
+  default_port             = 3389
+  address                  = "10.132.0.7"
+  egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
+}

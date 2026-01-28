@@ -4,7 +4,7 @@ data "nomad_plugin" "gcepd" {
 }
 
 resource "nomad_csi_volume" "vault_volume" {
-  count      = 3
+  count      = 1
   depends_on = [data.nomad_plugin.gcepd]
   namespace  = "vault-cluster"
   # lifecycle {

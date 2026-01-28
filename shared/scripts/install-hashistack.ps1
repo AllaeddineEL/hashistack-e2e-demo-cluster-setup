@@ -28,6 +28,12 @@ mkdir $NOMAD_CERTS_PATH
 mkdir $NOMAD_PLUGINS_PATH
 
 
+# Install the DNS Server role
+Install-WindowsFeature -Name DNS -IncludeManagementTools
+Get-WindowsFeature DNS
+Get-Service DNS
+Start-Service DNS
+Set-Service DNS -StartupType Automatic
 
 # Download Consul    
 cd $CONSUL_PATH

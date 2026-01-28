@@ -153,3 +153,15 @@ Replace-Token "$NOMAD_CONFIG_PATH\nomad.hcl" "_CONSUL_AGENT_TOKEN" $NOMAD_AGENT_
 
 Start-Service consul
 Start-Service nomad
+
+Add-DnsServerConditionalForwarderZone `
+  -Name "$CONSUL_DOMAIN" `
+  -MasterServers 127.0.0.1 `
+  -PassThru
+
+Set-ItemProperty `
+  -Path "HKLM:\SYSTEM\CurrentControlSet\Services\DNS\Parameters\Forwarders" `
+  -Name "Port" `
+  -Value 8600
+
+Restart-Service DNS  
