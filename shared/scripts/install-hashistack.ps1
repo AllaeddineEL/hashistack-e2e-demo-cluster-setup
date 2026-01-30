@@ -1,5 +1,6 @@
 $CONSUL_VERSION = "1.22.2+ent"
 $NOMAD_VERSION = "1.11.1+ent"
+$COREDNS_VERSION = "v1.14.1"
 
 $CONSUL_PATH = "C:\consul"
 $CONSUL_CONFIG_PATH = "C:\consul\config"
@@ -12,6 +13,8 @@ $NOMAD_CONFIG_PATH = "C:\nomad\config"
 $NOMAD_DATA_PATH = "C:\nomad\data"
 $NOMAD_CERTS_PATH = "C:\nomad\certs"
 $NOMAD_PLUGINS_PATH = "C:\nomad\plugins"
+
+$COREDNS_PATH = "C:\coredns"
 
 # Configure firewall rules
 Start-Process -FilePath C:\Windows\System32\netsh.exe -ArgumentList "advfirewall set publicprofile state off"
@@ -27,13 +30,9 @@ mkdir $NOMAD_DATA_PATH
 mkdir $NOMAD_CERTS_PATH
 mkdir $NOMAD_PLUGINS_PATH
 
+mkdir $COREDNS_PATH
 
-# Install the DNS Server role
-Install-WindowsFeature -Name DNS -IncludeManagementTools
-Get-WindowsFeature DNS
-Get-Service DNS
-Start-Service DNS
-Set-Service DNS -StartupType Automatic
+
 
 # Download Consul    
 cd $CONSUL_PATH
@@ -53,6 +52,21 @@ Invoke-WebRequest -Uri $Url -OutFile "nomad.zip" -UseBasicParsing
 
 Expand-Archive -Path nomad.zip -DestinationPath .
 
+
+# Download CoreDNS    
+cd $COREDNS_PATH
+
+
+$Url = "https://github.com/coredns/coredns/releases/download/${COREDNS_VERSION}/coredns_${COREDNS_VERSION}_windows_amd64.tgz"
+
+Invoke-WebRequest -Uri $Url -OutFile "coredns.tgz" -UseBasicParsing
+
+# Extract the tgz file
+
+tar -xzf coredns.tgz
+
+rm coredns.tgz
+
 # Create Windows service 
 
 New-Service `
@@ -65,6 +79,12 @@ New-Service `
 -Name "nomad" `
 -BinaryPathName "$NOMAD_PATH\nomad.exe agent -config=$NOMAD_CONFIG_PATH" `
 -DisplayName "HashiCorp Nomad Agent" `
+-StartupType Automatic
+
+New-Service `
+-Name "coredns" `
+-BinaryPathName "$COREDNS_PATH\coredns.exe -conf=$COREDNS_PATH\Corefile" `
+-DisplayName "CoreDNS Agent" `
 -StartupType Automatic
 
 # Create Firewall Rules

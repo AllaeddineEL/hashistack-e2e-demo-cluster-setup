@@ -1,0 +1,11 @@
+.:53 {
+    forward . _DNS_SERVER_ADDRESSES
+    log
+    errors
+}
+
+_CONSUL_DOMAIN:53 {
+    forward . 127.0.0.1:8600
+    log
+    errors
+}
