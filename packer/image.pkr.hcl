@@ -148,5 +148,10 @@ build {
     source = "../shared/conf/agent-config-nomad_win_client.hcl"
     destination = "C:/nomad/config/nomad.hcl"
   }
+  provisioner "file" {
+    only   = ["googlecompute.win-hashistack"]
+    source = "../shared/conf/agent-config-coredns_win_client"
+    destination = "C:/coredns/Corefile"
+  }
 
 }
