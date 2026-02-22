@@ -182,7 +182,7 @@ Replace-Token "$COREDNS_PATH\Corefile" "_CONSUL_DOMAIN" $CONSUL_DOMAIN
 
 Start-Service consul
 Start-Service nomad
-
+"$COREDNS_PATH\WinCoreDNS.exe start"
 $DNSserverAddresses = $serverAddresses -join ","
 
 Set-DnsClientServerAddress `

@@ -33,10 +33,6 @@ mkdir $NOMAD_DATA_PATH
 mkdir $NOMAD_CERTS_PATH
 mkdir $NOMAD_PLUGINS_PATH
 
-mkdir $COREDNS_PATH
-
-
-
 # Download Consul    
 cd $CONSUL_PATH
 
@@ -150,7 +146,7 @@ New-Service `
 -DisplayName "HashiCorp Nomad Agent" `
 -StartupType Automatic
 
-$COREDNS_PATH\WinCoreDNS.exe install
+"$COREDNS_PATH\WinCoreDNS.exe install"
 
 # Create Firewall Rules
 
