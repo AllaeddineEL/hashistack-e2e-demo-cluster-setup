@@ -32,6 +32,12 @@ client {
     _NOMAD_AGENT_META
   }
 }
+plugin "nomad_iis" {
+  config {
+    enabled = true
+    allowed_target_websites = ["*"]
+  }
+}
 
 # -----------------------------+
 # NETWORKING CONFIG            |

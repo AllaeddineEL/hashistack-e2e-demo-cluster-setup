@@ -20,6 +20,9 @@ output "kms_sa_key" {
   sensitive = true
   value     = google_service_account_key.vault_kms_service_account_key.private_key
 }
+output "win_client_ip" {
+  value = google_compute_instance.windows_client.*.network_interface.0.network_ip
+}
 resource "local_file" "environment_variables" {
   filename = "datacenter.env"
   content  = <<-EOT

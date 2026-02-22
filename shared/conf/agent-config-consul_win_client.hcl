@@ -49,14 +49,14 @@ ports {
   https     = -1
   grpc      = 8502
   grpc_tls  = -1
-  dns       = 8600
+  dns       = 53
 }
 
 # Join other Consul agents
 retry_join = [ "_CONSUL_RETRY_JOIN" ]
 
 # DNS recursors
-recursors = ["1.1.1.1"]
+recursors = ["_DNS_SERVER_ADDRESSES","1.1.1.1"]
 
 # -----------------------------+
 # MONITORING CONFIG            |

@@ -1,6 +1,9 @@
 $CONSUL_VERSION = "1.22.2+ent"
 $NOMAD_VERSION = "1.11.1+ent"
-$COREDNS_VERSION = "v1.14.1"
+$COREDNS_VERSION = "1.14.1"
+$winSWVersion = "v2.12.0"
+$IIS_PLUGIN_VERSION = "v0.19.0"
+
 
 $CONSUL_PATH = "C:\consul"
 $CONSUL_CONFIG_PATH = "C:\consul\config"
@@ -43,6 +46,8 @@ Invoke-WebRequest -Uri $Url -OutFile "consul.zip" -UseBasicParsing
 
 Expand-Archive -Path consul.zip -DestinationPath .
 
+rm consul.zip
+
 # Download Nomad    
 cd $NOMAD_PATH
 
@@ -52,12 +57,69 @@ Invoke-WebRequest -Uri $Url -OutFile "nomad.zip" -UseBasicParsing
 
 Expand-Archive -Path nomad.zip -DestinationPath .
 
+rm nomad.zip
+
+# Download IIS Plugin
+cd $NOMAD_PLUGINS_PATH
+
+$IISPluginUrl = "https://github.com/sevensolutions/nomad-iis/releases/download/$IIS_PLUGIN_VERSION/nomad_iis_mgmt_api.zip"
+
+Invoke-WebRequest -Uri $IISPluginUrl -OutFile "nomad_iis_mgmt_api.zip" -UseBasicParsing
+
+Expand-Archive -Path nomad_iis_mgmt_api.zip -DestinationPath .
+
+rm nomad_iis_mgmt_api.zip
+
+# Install Windows IIS
+
+$features = @(
+    "IIS-WebServerRole",
+    "IIS-WebServer",
+    "IIS-CommonHttpFeatures",
+    "IIS-HttpErrors",
+    "IIS-HttpRedirect",
+    "IIS-ApplicationDevelopment",
+    "NetFx4Extended-ASPNET45",
+    "IIS-NetFxExtensibility45",
+    "IIS-HealthAndDiagnostics",
+    "IIS-HttpLogging",
+    "IIS-LoggingLibraries",
+    "IIS-RequestMonitor",
+    "IIS-HttpTracing",
+    "IIS-Security",
+    "IIS-RequestFiltering",
+    "IIS-Performance",
+    "IIS-WebServerManagementTools",
+    "IIS-IIS6ManagementCompatibility",
+    "IIS-Metabase",
+    "IIS-ManagementConsole",
+    "IIS-BasicAuthentication",
+    "IIS-WindowsAuthentication",
+    "IIS-StaticContent",
+    "IIS-DefaultDocument",
+    "IIS-WebSockets",
+    "IIS-ApplicationInit",
+    "IIS-ISAPIExtensions",
+    "IIS-ISAPIFilter",
+    "IIS-HttpCompressionStatic",
+    "IIS-ASP",
+    "IIS-ServerSideIncludes",
+    "IIS-ASPNET45"
+)
+
+Enable-WindowsOptionalFeature -Online -FeatureName $features
+
+# Enable feature delegation for Anonymous Authentication in the host configuration of IIS
+Set-WebConfiguration //System.WebServer/Security/Authentication/anonymousAuthentication -metadata overrideMode -value Allow
+
+# Nomad client will dynamically allocate ports on your machine in the range 20000-32000. Therefore we need to open these ports on the Windows Firewall by running
+New-NetFirewallRule -DisplayName "Allow Nomad Dynamic Ports 20000-32000" -Action Allow -Direction Inbound -Protocol TCP -LocalPort 20000-32000
 
 # Download CoreDNS    
 cd $COREDNS_PATH
 
 
-$Url = "https://github.com/coredns/coredns/releases/download/${COREDNS_VERSION}/coredns_${COREDNS_VERSION}_windows_amd64.tgz"
+$Url = "https://github.com/coredns/coredns/releases/download/v${COREDNS_VERSION}/coredns_${COREDNS_VERSION}_windows_amd64.tgz"
 
 Invoke-WebRequest -Uri $Url -OutFile "coredns.tgz" -UseBasicParsing
 
@@ -66,6 +128,13 @@ Invoke-WebRequest -Uri $Url -OutFile "coredns.tgz" -UseBasicParsing
 tar -xzf coredns.tgz
 
 rm coredns.tgz
+
+# Download and install winsw (Windows Service Wrapper) to run CoreDNS as Windows services
+
+$WinSWUrl = "https://github.com/winsw/winsw/releases/download/$winSWVersion/WinSW-x64.exe"
+
+Invoke-WebRequest -Uri $WinSWUrl -OutFile "$COREDNS_PATH\WinCoreDNS.exe" -UseBasicParsing
+
 
 # Create Windows service 
 
@@ -81,11 +150,7 @@ New-Service `
 -DisplayName "HashiCorp Nomad Agent" `
 -StartupType Automatic
 
-New-Service `
--Name "coredns" `
--BinaryPathName "$COREDNS_PATH\coredns.exe -conf=$COREDNS_PATH\Corefile" `
--DisplayName "CoreDNS Agent" `
--StartupType Automatic
+$COREDNS_PATH\WinCoreDNS.exe install
 
 # Create Firewall Rules
 

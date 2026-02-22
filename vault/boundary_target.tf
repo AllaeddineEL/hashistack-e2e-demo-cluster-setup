@@ -38,6 +38,6 @@ resource "boundary_target" "win" {
   scope_id                 = boundary_scope.shared_svc_project.id
   session_connection_limit = -1
   default_port             = 3389
-  address                  = "10.132.0.7"
+  address                  = element(data.terraform_remote_state.local.outputs.win_client_ip, 0)
   egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
 }

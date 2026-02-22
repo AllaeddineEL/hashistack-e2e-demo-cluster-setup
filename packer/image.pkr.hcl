@@ -105,6 +105,18 @@ build {
     sbom_name   = "sbom-cyclonedx-ubuntu"
   }
 
+  # Copy the WinSW configuration file to the Windows HashiStack image
+  provisioner "file" {
+    only   = ["googlecompute.win-hashistack"]
+    source = "../shared/conf/WinSW-CoreDNS.xml"
+    destination = "C:/coredns/WinCoreDNS.xml"
+  }
+   provisioner "file" {
+    only   = ["googlecompute.win-hashistack"]
+    source = "../shared/conf/agent-config-coredns_win_client"
+    destination = "C:/coredns/Corefile"
+  }
+
   provisioner "powershell" {
     only   = ["googlecompute.win-hashistack"]
     script = "../shared/scripts/install-hashistack.ps1"
@@ -147,11 +159,6 @@ build {
     only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/agent-config-nomad_win_client.hcl"
     destination = "C:/nomad/config/nomad.hcl"
-  }
-  provisioner "file" {
-    only   = ["googlecompute.win-hashistack"]
-    source = "../shared/conf/agent-config-coredns_win_client"
-    destination = "C:/coredns/Corefile"
   }
 
 }

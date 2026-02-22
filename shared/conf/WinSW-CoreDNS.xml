@@ -1,0 +1,13 @@
+<service>
+  <id>CoreDNS</id>
+  <name>CoreDNS</name>
+  <description>CoreDNS Windows Service</description>
+
+  <executable>coredns.exe</executable>
+  <arguments>-conf Corefile</arguments>
+  <workingdirectory>C:\coredns</workingdirectory>
+
+  <logmode>roll</logmode>
+
+  <onfailure action="restart" delay="10 sec"/>
+</service>
