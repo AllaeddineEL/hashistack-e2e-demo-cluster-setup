@@ -29,12 +29,12 @@ job "vault-cluster" {
 
       port "api" {
         to     = "8200"
-       # static = "8200"
+        static = "8200"
       }
 
       port "cluster" {
         to     = "8201"
-        #static = "8201"
+        static = "8201"
       }
     }
 
