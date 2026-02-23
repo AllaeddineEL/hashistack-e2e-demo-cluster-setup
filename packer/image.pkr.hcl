@@ -106,6 +106,15 @@ build {
   }
 
   # Copy the WinSW configuration file to the Windows HashiStack image
+
+  provisioner "powershell" {
+    only   = ["googlecompute.win-hashistack"]
+    inline = [
+      "mkdir \"C:\\coredns\""
+    ]
+    elevated_user     = var.packer_username
+    elevated_password = var.packer_user_password
+  }
   provisioner "file" {
     only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/WinSW-CoreDNS.xml"

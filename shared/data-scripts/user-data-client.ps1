@@ -25,6 +25,7 @@ $NOMAD_CERTS_PATH = "C:\nomad\certs"
 $NOMAD_PLUGINS_PATH = "C:\nomad\plugins"
 
 $COREDNS_PATH = "C:\coredns"
+$serviceName  = "WinCoreDNS"
 
 
 Write-Host "Decoding certificates..."
@@ -156,6 +157,7 @@ Replace-Token "$CONSUL_CONFIG_PATH\consul.hcl" "_CONSUL_RETRY_JOIN"    $CONSUL_R
 Replace-Token "$CONSUL_CONFIG_PATH\consul.hcl" "_CONSUL_ENCRYPTION_KEY" $CONSUL_ENCRYPTION_KEY
 Replace-Token "$CONSUL_CONFIG_PATH\consul.hcl" "_CONSUL_AGENT_TOKEN"   $CONSUL_AGENT_TOKEN
 Replace-Token "$CONSUL_CONFIG_PATH\consul.hcl" "_CONSUL_DEFAULT_TOKEN" $CONSUL_DEFAULT_TOKEN
+Replace-Token "$CONSUL_CONFIG_PATH\consul.hcl" "_DNS_SERVER_ADDRESSES" $DNSserverAddresses
 
 # -------------------------------------------------------------------------------
 # Render Nomad config
@@ -182,7 +184,13 @@ Replace-Token "$COREDNS_PATH\Corefile" "_CONSUL_DOMAIN" $CONSUL_DOMAIN
 
 Start-Service consul
 Start-Service nomad
-"$COREDNS_PATH\WinCoreDNS.exe start"
+
+
+$serviceExe = Join-Path $COREDNS_PATH "$serviceName.exe"
+
+Write-Host "Installing service..."
+& $serviceExe start 
+
 $DNSserverAddresses = $serverAddresses -join ","
 
 Set-DnsClientServerAddress `

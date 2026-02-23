@@ -18,6 +18,7 @@ $NOMAD_CERTS_PATH = "C:\nomad\certs"
 $NOMAD_PLUGINS_PATH = "C:\nomad\plugins"
 
 $COREDNS_PATH = "C:\coredns"
+$serviceName  = "WinCoreDNS"
 
 # Configure firewall rules
 Start-Process -FilePath C:\Windows\System32\netsh.exe -ArgumentList "advfirewall set publicprofile state off"
@@ -146,7 +147,11 @@ New-Service `
 -DisplayName "HashiCorp Nomad Agent" `
 -StartupType Automatic
 
-"$COREDNS_PATH\WinCoreDNS.exe install"
+$serviceExe = Join-Path $COREDNS_PATH "$serviceName.exe"
+
+Write-Host "Installing service..."
+& $serviceExe install 
+
 
 # Create Firewall Rules
 

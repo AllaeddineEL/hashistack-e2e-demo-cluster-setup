@@ -49,7 +49,7 @@ ports {
   https     = -1
   grpc      = 8502
   grpc_tls  = -1
-  dns       = 53
+  dns       = 8600
 }
 
 # Join other Consul agents
