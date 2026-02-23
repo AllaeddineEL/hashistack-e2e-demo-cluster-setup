@@ -154,7 +154,7 @@ resource "google_compute_instance" "server" {
 resource "google_compute_instance" "linux_client" {
   count        = var.linux_client_count
   name         = "${var.name}-linux-client-${count.index}"
-  machine_type = var.client_instance_type
+  machine_type = var.linux_client_instance_type
   zone         = var.zone
   tags         = ["auto-join", "nomad-clients"]
 
@@ -208,7 +208,7 @@ resource "google_compute_instance" "linux_client" {
 resource "google_compute_instance" "windows_client" {
   count        = var.win_client_count
   name         = "${var.name}-windows-client-${count.index}"
-  machine_type = var.client_instance_type
+  machine_type = var.win_client_instance_type
   zone         = var.zone
   tags         = ["auto-join", "nomad-clients"]
 

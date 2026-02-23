@@ -31,9 +31,13 @@ variable "server_instance_type" {
   default     = "e2-standard-2"
 }
 
-variable "client_instance_type" {
+variable "linux_client_instance_type" {
   description = "The compute engine instance type to use for clients."
   default     = "e2-standard-2"
+}
+variable "win_client_instance_type" {
+  description = "The compute engine instance type to use for clients."
+  default     = "e2-standard-4"
 }
 
 variable "server_count" {
