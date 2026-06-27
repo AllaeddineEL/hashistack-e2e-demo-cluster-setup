@@ -2,7 +2,7 @@ packer {
   required_plugins {
     googlecompute = {
       source  = "github.com/hashicorp/googlecompute"
-      version = "~> 1.1.4"
+      version = "~> 1"
     }
     ansible = {
       version = "~> 1"
@@ -32,10 +32,16 @@ variable "packer_user_password" {
   default = "Hash!5tack"
 }
 
+data "googlecompute-image" "hashistack" {
+  project_id = "ubuntu-os-cloud"
+  filters = "family=ubuntu-minimal-2404-lts-amd64 AND labels.public-image=true"
+  most_recent = true
+}
+
 source "googlecompute" "hashistack" {
   image_name   = "hashistack-${local.timestamp}"
   project_id   = var.project
-  source_image = "ubuntu-minimal-2404-noble-amd64-v20241004"
+  source_image = data.googlecompute-image.hashistack.name #"ubuntu-minimal-2404-noble-amd64-v20241004"
   ssh_username = "ubuntu"
   zone         = var.zone
 }
@@ -70,42 +76,31 @@ hcp_packer_registry {
 }
 
 build {
-  sources = ["sources.googlecompute.hashistack", "sources.googlecompute.win-hashistack"]
-
+  sources = ["sources.googlecompute.win-hashistack"]
+   
+  
+  provisioner "file" {
+    only   = ["googlecompute.hashistack"]
+    destination = "/tmp/"
+    source      = "../shared"
+  }
+  provisioner "shell" {
+    only   = ["googlecompute.hashistack"]
+    inline = [
+      "sudo mkdir -p /ops/shared",
+      "sudo cp -R /tmp/shared /ops/"
+    #  "cnspec sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
+    ]
+  }
    #Provision the linux HashiStack image with Ansible
    provisioner "ansible" {
       only   = ["googlecompute.hashistack"]
       playbook_file = "../shared/scripts/hashistack.yml"
       user          = "ubuntu"
       extra_arguments = [
-        "--extra-vars", "cloud_env=gce","--become"
+        "--extra-vars", "cloud_env=gce","--become", "-v" 
       ]
-
    }
-     # Install mondoo
-  provisioner "shell" {
-    only   = ["googlecompute.hashistack"]
-    inline = [
-      "sudo bash -c \"$(curl -sSL https://install.mondoo.com/sh)\""
-    ]
-  }
-
-  # Run mondoo to generate the SBOM
-  provisioner "shell" {
-    only   = ["googlecompute.hashistack"]
-    inline_shebang = "/bin/bash -x"
-    inline = [
-      "cnspec providers install os network",
-      "cnspec sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
-    ]
-  }
-  # Upload Linux SBOM
-  provisioner "hcp-sbom" {
-    only   = ["googlecompute.hashistack"]
-    source      = "/tmp/sbom_cyclonedx.json"
-    destination = "./sbom"
-    sbom_name   = "sbom-cyclonedx-ubuntu"
-  }
 
   # Copy the WinSW configuration file to the Windows HashiStack image
 
@@ -134,33 +129,12 @@ build {
     elevated_user     = var.packer_username
     elevated_password = var.packer_user_password
   }
-  provisioner "powershell" {
-    only   = ["googlecompute.win-hashistack"]
-    inline = [
-      "Set-ExecutionPolicy Unrestricted -Scope Process -Force;", 
-      "[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072;",
-      "iex ((New-Object System.Net.WebClient).DownloadString('https://install.mondoo.com/ps1/cnquery'));",
-      "Install-Mondoo -Product cnquery;"
-    ]
-    elevated_user     = var.packer_username
-    elevated_password = var.packer_user_password
-  }
-
-  provisioner "powershell" {
-    only   = ["googlecompute.win-hashistack"]
-    inline = [
-    "& \"C:\\Program Files\\Mondoo\\cnquery.exe\" sbom --output cyclonedx-json --output-target C:\\Windows\\Temp\\win_sbom_cyclonedx.json"
-    ]
-    elevated_user     = var.packer_username
-    elevated_password = var.packer_user_password
-  }
+  # Upload Linux SBOM
   provisioner "hcp-sbom" {
-    only   = ["googlecompute.win-hashistack"]
-    source      = "C:/Windows/Temp/win_sbom_cyclonedx.json"
-    destination = "./win-sbom"
-    sbom_name   = "sbom-cyclonedx-windows"
-  }
-
+  auto_generate = true
+  destination = "./sbom/sbom_cyclonedx.json"
+  sbom_name     = "auto-generated-sbom"
+}
   provisioner "file" {
     only   = ["googlecompute.win-hashistack"]
     source = "../shared/conf/agent-config-consul_win_client.hcl"

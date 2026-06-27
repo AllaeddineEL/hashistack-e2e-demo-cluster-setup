@@ -37,16 +37,16 @@
         line: "DEBIAN_FRONTEND=noninteractive"
         create: yes
   tasks:
-    - name: Create the shared directory
-      ansible.builtin.file:
-        path: /ops/shared
-        state: directory
-        mode: "0777"
-    - name: Copy shared directory contents
-      ansible.builtin.copy:
-        src: ../
-        dest: /ops/shared
-        mode: "0777"
+    # - name: Create the shared directory
+    #   ansible.builtin.file:
+    #     path: /ops/shared
+    #     state: directory
+    #     mode: "0777"
+    # - name: Copy shared directory contents
+    #   ansible.builtin.copy:
+    #     src: ../../shared
+    #     dest: /ops/shared
+    #     mode: "0777"
     - name: Install software-properties-common (AWS/Azure)
       apt:
         name: software-properties-common
@@ -88,12 +88,12 @@
       command: apt-get clean
       changed_when: false
 
-    - name: Disable UFW firewall (if installed)
-      service:
-        name: ufw
-        state: stopped
-        enabled: no
-      ignore_errors: yes
+    # - name: Disable UFW firewall (if installed)
+    #   service:
+    #     name: ufw
+    #     state: stopped
+    #     enabled: no
+    #   ignore_errors: yes
 
     - name: Create Consul Template directories
       file:
