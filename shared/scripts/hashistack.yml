@@ -14,9 +14,9 @@
   become: yes
   #remote_tmp: '/tmp'
   vars:
-    consul_version: "1.22.2+ent"
-    nomad_version: "1.11.1+ent"
-    consul_template_version: "0.39.1"
+    consul_version: "2.0.1+ent"
+    nomad_version: "2.0.3+ent"
+    consul_template_version: "0.42.0"
     config_dir: /ops/shared/config
     consul_template_config_dir: /etc/consul-template.d
     consul_template_dir: /opt/consul-template

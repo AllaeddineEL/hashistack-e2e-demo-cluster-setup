@@ -93,8 +93,10 @@ build {
   # Run mondoo to generate the SBOM
   provisioner "shell" {
     only   = ["googlecompute.hashistack"]
+    inline_shebang = "/bin/bash -x"
     inline = [
-      "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
+      "cnspec providers install os network",
+      "cnspec sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
     ]
   }
   # Upload Linux SBOM
