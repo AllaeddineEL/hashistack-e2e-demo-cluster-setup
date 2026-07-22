@@ -42,7 +42,7 @@ variable "win_client_instance_type" {
 
 variable "server_count" {
   description = "The number of servers to provision."
-  default     = "3"
+  default     = "1"
 }
 
 variable "linux_client_count" {
@@ -51,7 +51,7 @@ variable "linux_client_count" {
 }
 variable "win_client_count" {
   description = "The number of Windows clients to provision."
-  default     = "1"
+  default     = "2"
 }
 
 variable "root_block_device_size" {

@@ -76,7 +76,7 @@ hcp_packer_registry {
 }
 
 build {
-  sources = ["sources.googlecompute.win-hashistack"]
+  sources = ["sources.googlecompute.win-hashistack", "sources.googlecompute.hashistack"]
    
   
   provisioner "file" {
@@ -131,6 +131,7 @@ build {
   }
   # Upload Linux SBOM
   provisioner "hcp-sbom" {
+  only   = ["googlecompute.hashistack"]  
   auto_generate = true
   destination = "./sbom/sbom_cyclonedx.json"
   sbom_name     = "auto-generated-sbom"

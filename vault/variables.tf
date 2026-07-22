@@ -20,5 +20,5 @@ variable "name" {
 
 variable "vault_version" {
   description = "The version of Vault to deploy."
-  default     = "1.21.1"
+  default     = "2.0.3"
 }

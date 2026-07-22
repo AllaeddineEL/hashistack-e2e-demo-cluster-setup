@@ -40,6 +40,7 @@ job "vault-cluster" {
 
     task "vault" {
       driver = "docker"
+      user = "0:0" 
       template {
         data = <<EOH
         ${base64decode(data.terraform_remote_state.local.outputs.kms_sa_key)}
