@@ -41,3 +41,14 @@ resource "boundary_target" "win" {
   address                  = element(data.terraform_remote_state.local.outputs.win_client_ip, 0)
   egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
 }
+
+resource "boundary_target" "iis" {
+  type                     = "tcp"
+  name                     = "iis"
+  description              = "Connect to the IIS App"
+  scope_id                 = boundary_scope.shared_svc_project.id
+  session_connection_limit = -1
+  default_port             = 80
+  address                  = "iis-sample-app.service.dc1.global"
+  egress_worker_filter     = "\"${var.region}\" in \"/tags/region\""
+}
