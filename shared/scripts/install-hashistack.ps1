@@ -1,5 +1,5 @@
-$CONSUL_VERSION = "2.0.1+ent"
-$NOMAD_VERSION = "2.0.3+ent"
+$CONSUL_VERSION = "2.0.3+ent"
+$NOMAD_VERSION = "2.0.5+ent"
 $COREDNS_VERSION = "1.14.4"
 $winSWVersion = "v2.12.0"
 $IIS_PLUGIN_VERSION = "v1.21.0"
