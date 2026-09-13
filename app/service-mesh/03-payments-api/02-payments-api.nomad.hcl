@@ -88,6 +88,7 @@ job "payments-api" {
     }
     task "payments-api" {
       driver = "docker"
+      consul {}
       meta {
         service = "payments-api"
       }

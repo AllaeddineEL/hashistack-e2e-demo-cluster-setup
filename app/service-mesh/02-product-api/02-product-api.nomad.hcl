@@ -103,7 +103,7 @@ job "product-api" {
     }
     task "product-api" {
       driver = "docker"
-      
+      consul {}
       meta {
         service = "product-api"
       }

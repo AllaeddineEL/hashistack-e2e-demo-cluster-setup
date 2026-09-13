@@ -40,6 +40,7 @@ job "vault-cluster" {
 
     task "vault" {
       driver = "docker"
+      consul {}
       user = "0:0" 
       template {
         data = <<EOH
